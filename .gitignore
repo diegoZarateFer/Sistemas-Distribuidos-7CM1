@@ -1,0 +1,16 @@
+# Ignorar archivos compilados
+*.class
+
+# Ignorar dependencias (si usas Maven o Gradle)
+target/
+*.jar
+*.war
+
+# Ignorar configuración del IDE
+/.idea/
+/.vscode/
+*.iml
+
+# Ignorar archivos del sistema operativo
+.DS_Store
+Thumbs.db
