@@ -47,20 +47,22 @@ class Producto {
 
     @Override
     public String toString() {
-        return "Producto " + id + ": " + cantidad + " unidades";
+        return id + "," + cantidad;
+    }
+
+    public static Producto fromString(String data) {
+        String[] parts = data.split(",");
+        return new Producto(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
     }
 }
 
 public class ServidorTienda {
     private static final int PUERTO = 5000;
+    private static final String ARCHIVO_INVENTARIO = "inventario.txt";
     private static final List<Producto> productos = new ArrayList<>();
 
     public static void main(String[] args) {
-        Random random = new Random();
-
-        for (int i = 1; i <= 10; i++) {
-            productos.add(new Producto(i, random.nextInt(20) + 10));
-        }
+        cargarInventarioDesdeArchivo();
 
         try (ServerSocket serverSocket = new ServerSocket(PUERTO)) {
             System.out.println("Servidor de tienda en ejecución en el puerto " + PUERTO);
@@ -92,7 +94,8 @@ public class ServidorTienda {
                 if ("consultar".equalsIgnoreCase(accion)) {
                     StringBuilder inventario = new StringBuilder();
                     for (Producto p : productos) {
-                        inventario.append(p.toString()).append("\n");
+                        inventario.append("Producto ").append(p.getId()).append(": ")
+                                .append(p.getCantidad()).append(" unidades\n");
                     }
                     salida.writeObject(inventario.toString());
                     return;
@@ -125,6 +128,8 @@ public class ServidorTienda {
                     salida.writeObject("Acción no reconocida");
                 }
 
+                guardarInventarioEnArchivo();
+
                 System.out.println("Estado actual del inventario:");
                 for (Producto p : productos) {
                     System.out.println(p);
@@ -134,5 +139,41 @@ public class ServidorTienda {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static void cargarInventarioDesdeArchivo() {
+        File archivo = new File(ARCHIVO_INVENTARIO);
+        if (!archivo.exists()) {
+            inicializarInventario();
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                productos.add(Producto.fromString(linea));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void guardarInventarioEnArchivo() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(ARCHIVO_INVENTARIO))) {
+            for (Producto p : productos) {
+                writer.write(p.toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void inicializarInventario() {
+        Random random = new Random();
+        for (int i = 1; i <= 10; i++) {
+            productos.add(new Producto(i, random.nextInt(20) + 10));
+        }
+        guardarInventarioEnArchivo();
     }
 }
