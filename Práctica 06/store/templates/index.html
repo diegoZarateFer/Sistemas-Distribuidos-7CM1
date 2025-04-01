@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda</title>
+</head>
+<body>
+    <h1>Tienda de Productos</h1>
+    <a href="{{ url_for('add_product') }}">Agregar Producto</a>
+    <h2>Productos Disponibles</h2>
+    <ul>
+        {% for product in products %}
+            <li>
+                {{ product.name }} - ${{ product.price }} - Stock: {{ product.stock }}
+                <form action="{{ url_for('buy_product', product_id=product.id) }}" method="POST">
+                    <button type="submit">Comprar</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
